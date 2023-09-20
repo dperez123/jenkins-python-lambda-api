@@ -1,0 +1,26 @@
+// this is the jenkinsfile that will be used to deploy the lambda function
+pipeline {
+    agent any
+    stages {
+        // stage to copy code from git to jenkins workspace
+        stage('get Code') {
+            steps {
+                git 'git@github.com:your_github_username/your_repo_name.git'
+            }
+        }
+        // stage build the lambda function
+        stage('build') {    
+            steps {
+                // copy the files to a remote server rsync
+                sh 'rsync -auv --rsh="ssh -p22" --delete-after --exclude=.git --exclude=.gitignore --exclude=Jenkinsfile . your_username@ip_address:/home/your_username/jenkins/lambda-deploy'
+            }
+        }
+        // stage to deploy the lambda function
+        stage('deploy') {
+            steps {
+                // ssh to the remote server and run the deploy script
+                sh 'ssh -p22 your_username@ip "cd /home/your_username/jenkins/lambda-deploy && ./deploy.py"'
+            }
+        }
+    }
+}
